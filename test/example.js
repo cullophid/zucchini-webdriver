@@ -11,7 +11,7 @@ describe('example', async () => {
   afterEach(end)
 
   it('should login', async () => {
-    await visit('/login')
+    visit('/login')
 
     await fill('[name=email]', 'andreas@sentia.io')
     await fill('[name=password]', 'password')
