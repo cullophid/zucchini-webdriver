@@ -1,46 +1,45 @@
-import webdriverio from 'webdriverio'
-
+import wd from 'wd'
+import {chainFactory, waitFor} from './helpers'
+const browser = wd.promiseRemote()
+const options = {browserName: 'chrome'}
 const HOST = 'http://app.sentia.io'
 const DEFAULT_TIMEOUT = 5000
-const options = {desiredCapabilities: { browserName: 'chrome' }}
-const client = webdriverio.remote(options)
 
-let browser;
+const chain = chainFactory()
 
-export const init = () =>
-  browser = client.init().url(HOST)
+const $ = (selector) => waitFor(() => browser.elementByCss(selector))
 
-export const end = () =>
-  browser.end()
+export const init = chain(() => browser.init(options))
 
-export const visit = (path) =>
-  browser.url(HOST + path)
+export const end = chain(() => browser.quit())
 
-export const fill = (selector, value) =>
-  browser
-    .waitForExist(selector, DEFAULT_TIMEOUT)
-    .setValue(selector, value)
+export const visit = chain((path) => browser.get(HOST + path))
 
-export const click = (selector) =>
-  browser
-    .waitForExist(selector, DEFAULT_TIMEOUT)
-    .click(selector)
+export const fill = chain(async (selector, value) => {
+  const e = await $(selector)
+  return e.type(value)
+})
 
-export const exists = (selector) =>
-    browser.waitForExist(selector, DEFAULT_TIMEOUT)
+export const click = chain(async (selector) => {
+  const e = await $(selector)
+  return e.click()
+})
 
-export const getText = (selector) =>
-  browser
-    .waitForExist(selector, DEFAULT_TIMEOUT)
-    .getText(selector)
+export const find = chain($)
 
+export const sleep = chain((duration) =>
+  new Promise((resolve) => setTimeout(() => resolve(), duration)))
 
-export const find = (selector) =>
-  browser
-    .waitForExist(selector, DEFAULT_TIMEOUT)
-    .element(selector)
+export const getText = chain(async (selector) => {
+  const e = await $(selector)
+  return browser.text(e)
+})
 
-export const assertText = (selector, text) =>
-  browser
-    .waitUntil(async () =>
-      await getText(selector) === text,DEFAULT_TIMEOUT)
+export const assertText = chain((selector, text) => waitFor(async () => {
+  const actual = await getText(selector)
+  if (actual === text) {
+    return true
+  }
+  console.log('assert', actual, text);
+  return Promise.reject('mismatch')
+}))
