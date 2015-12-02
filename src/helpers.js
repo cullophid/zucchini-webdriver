@@ -1,4 +1,7 @@
 const DEFAULT_TIMEOUT = 5000
+// create a chain function
+// this can be used to chain functions onto
+// a promise without having to call '.then(...)'
 export const chainFactory = () => {
   let promise = Promise.resolve()
   return (f) => (...args) => {
@@ -7,24 +10,23 @@ export const chainFactory = () => {
   }
 }
 
-export const waitFor = (f) => {
+const delay = (ms, f) => (...args) => setTimeout(() => f(...args), ms);
+
+// waitUntil keeps retrying a premise (Function)
+// until the given number of ms has passed
+export const waitUntil = (ms) => (premise) => {
   return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => {
-      reject('TIMEOUT')
-    }, DEFAULT_TIMEOUT)
-    const test = () => {
-      if (!timer) {
-        return
-      }
-      Promise.resolve()
-        .then(f)
-        .catch(test)
-        .then((e) => e === undefined ? Promise.reject() : e)
-        .then((result) => {
+    const timer = setTimeout(() => reject('Timeout'), ms)
+    const testPremise = () => {
+      return Promise.resolve()
+        .then(premise)
+        .then((v) => v === undefined ? Promise.reject(v) : v)
+        .then((v) => {
           clearTimeout(timer)
-          resolve(result);
+          resolve(v)
         })
+        .catch(delay(100, testPremise))
     }
-    test();
+    testPremise()
   })
 }

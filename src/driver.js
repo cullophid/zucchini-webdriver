@@ -1,45 +1,61 @@
 import wd from 'wd'
-import {chainFactory, waitFor} from './helpers'
+import {elementNotFound, textNotFound} from './errors'
+import {chainFactory, waitUntil} from './helpers'
 const browser = wd.promiseRemote()
-const options = {browserName: 'chrome'}
+const options = {browserName: 'firefox'}
 const HOST = 'http://app.sentia.io'
-const DEFAULT_TIMEOUT = 5000
+const DEFAULT_TIMEOUT = 10000
+
+
+const retry = waitUntil(DEFAULT_TIMEOUT)
 
 const chain = chainFactory()
 
-const $ = (selector) => waitFor(() => browser.elementByCss(selector))
+const _find = (selector) =>
+  retry(() => browser.elementByCss(selector))
+    .catch(elementNotFound(selector))
 
-export const init = chain(() => browser.init(options))
 
-export const end = chain(() => browser.quit())
+const _init = () => browser.init(options)
 
-export const visit = chain((path) => browser.get(HOST + path))
+const _end = () => browser.quit()
 
-export const fill = chain(async (selector, value) => {
-  const e = await $(selector)
+const _visit = (path) => browser.get(HOST + path)
+
+const _fill = async (selector, value) => {
+  const e = await _find(selector)
   return e.type(value)
-})
+}
 
-export const click = chain(async (selector) => {
-  const e = await $(selector)
+const _click = async (selector) => {
+  const e = await _find(selector)
   return e.click()
-})
+}
 
-export const find = chain($)
+const _sleep = (duration) =>
+  new Promise((resolve) => setTimeout(() => resolve(), duration))
 
-export const sleep = chain((duration) =>
-  new Promise((resolve) => setTimeout(() => resolve(), duration)))
-
-export const getText = chain(async (selector) => {
-  const e = await $(selector)
+const _getText = async (selector) => {
+  const e = await _find(selector)
   return browser.text(e)
-})
+}
 
-export const assertText = chain((selector, text) => waitFor(async () => {
-  const actual = await getText(selector)
+const _assertText = (selector, text) => retry(async () => {
+  const actual = await _getText(selector)
+
   if (actual === text) {
     return true
   }
-  console.log('assert', actual, text);
   return Promise.reject('mismatch')
-}))
+})
+  .catch(textNotFound(selector, text))
+
+export const init = chain(_init)
+export const end = chain(_end)
+export const visit = chain(_visit)
+export const find = chain(_find)
+export const fill = chain(_fill)
+export const click = chain(_click)
+export const sleep = chain(_sleep)
+export const getText = chain(_getText)
+export const assertText = chain(_assertText)
