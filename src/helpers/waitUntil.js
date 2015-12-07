@@ -6,7 +6,9 @@ const delay = (ms, f) => (...args) => setTimeout(() => f(...args), ms)
 // until the given number of ms has passed
 export default R.curry((ms, premise) => {
   return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => reject('Timeout'), ms)
+    const timer = setTimeout(() => {
+      reject('Timeout')
+    }, ms)
     const testPremise = () => {
       return Promise.resolve()
         .then(premise)

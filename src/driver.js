@@ -21,7 +21,7 @@ export default (options) => {
 
   const end = () => browser.quit()
 
-  const visit = (url) => browser.get(url)
+  const visit = (url) =>  browser.get(url)
 
   const fill = async (selector, value) => {
     const e = await find(selector)
@@ -55,6 +55,7 @@ export default (options) => {
   return {
     init: (...args) => chain(() => init(...args)),
     end: (...args) => chain(() => end(...args)),
+    kill: end,
     visit: (...args) => chain(() => visit(...args)),
     find: (...args) => chain(() => find(...args)),
     fill: (...args) => chain(() => fill(...args)),
