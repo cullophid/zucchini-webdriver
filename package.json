@@ -1,12 +1,13 @@
 {
-  "name": "couch-app",
+  "name": "web-test",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "postinstall": "selenium-standalone install",
-    "selenium:start": "selenium-standalone start &",
-    "test": "mocha -t 10000 --compilers js:babel-core/register -r babel-polyfill test"
+    "selenium:install": "selenium-standalone install",
+    "selenium:start": "selenium-standalone start",
+    "build": "babel src/ -d dist/ --presets es2015 --presets stage-3",
+    "test": "mocha -t 10000 --compilers js:babel-core/register -r babel-polyfill 'src/**/_spec/*.js'"
   },
   "author": "",
   "license": "ISC",
@@ -17,11 +18,12 @@
     "babel-preset-es2015": "^6.1.18",
     "babel-preset-stage-3": "^6.1.18",
     "eslint": "^1.10.3",
-    "eslint-plugin-react": "^3.11.2"
+    "eslint-plugin-react": "^3.11.2",
+    "selenium-standalone": "^4.7.2",
+    "mocha": "^2.3.4"
   },
   "dependencies": {
-    "mocha": "^2.3.4",
-    "selenium-standalone": "^4.7.2",
+    "ramda": "^0.18.0",
     "wd": "^0.4.0"
   }
 }

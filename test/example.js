@@ -1,36 +1,26 @@
 import assert from 'assert'
-import {
+import driver from '../dist'
+
+const {
   init, end, visit,
   sleep, fill, click,
-  assertText
-} from '../src/driver'
+  find, assertText
+} = driver()
 
-const login = async (email, password) => {
-  visit('/login')
-
-  fill('[name=email]', email)
-  fill('[name=password]', password)
-  click('input[type=submit]')
-  return assertText('h1', 'SentiaAnalytics')
-}
+const host = "http://airbnb.com";
+const go = (path = '') => visit(host + path)
 
 describe('example', async () => {
   beforeEach(init)
   afterEach(() => end())
 
-  it('should login', async () => {
-    await login('andreas@sentia.io', 'password')
+  it('should find an airbnb in london', async () => {
+    await go()
+    fill('#location', 'London')
+    fill('#checkin', '12-12-2015')
+    fill('#checkout', '14-12-2015')
+    click('#submit_location')
+    await find('#docked-filters')
   })
 
-  it('should show a working dashboard', async () => {
-    login('andreas@sentia.io', 'password')
-    visit('/')
-    fill('#start-date-picker', '2015-11-01')
-    fill('#end-date-picker', '2015-11-01')
-
-    assertText('#total-people', '2,586')
-    assertText('#total-revenue', '57,192.47')
-    assertText('#basket-size', '49.82DKK')
-    await assertText('#conversion', '44.39%')
-  })
 })

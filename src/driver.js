@@ -1,61 +1,67 @@
+import R from 'ramda'
 import wd from 'wd'
-import {elementNotFound, textNotFound} from './errors'
-import {chainFactory, waitUntil} from './helpers'
-const browser = wd.promiseRemote()
-const options = {browserName: 'firefox'}
-const HOST = 'http://app.sentia.io'
-const DEFAULT_TIMEOUT = 10000
+import {elementNotFound, textNotFound} from './helpers/errors'
+import waitUntil from './helpers/waitUntil'
+import chainFactory from './helpers/chain'
 
+export default (options) => {
+  const promise = Promise.resolve()
+  const browser = wd.promiseRemote()
+  const browserOptions =  {browserName: options.browser}
 
-const retry = waitUntil(DEFAULT_TIMEOUT)
+  const retry = waitUntil(options.timeout)
+  const chain = chainFactory()
 
-const chain = chainFactory()
+  // driver methods
+  const find = (selector) =>
+    retry(() => browser.elementByCss(selector))
+      .catch(elementNotFound(selector))
 
-const _find = (selector) =>
-  retry(() => browser.elementByCss(selector))
-    .catch(elementNotFound(selector))
+  const init = () => browser.init(options)
 
+  const end = () => browser.quit()
 
-const _init = () => browser.init(options)
+  const visit = (url) => browser.get(url)
 
-const _end = () => browser.quit()
-
-const _visit = (path) => browser.get(HOST + path)
-
-const _fill = async (selector, value) => {
-  const e = await _find(selector)
-  return e.type(value)
-}
-
-const _click = async (selector) => {
-  const e = await _find(selector)
-  return e.click()
-}
-
-const _sleep = (duration) =>
-  new Promise((resolve) => setTimeout(() => resolve(), duration))
-
-const _getText = async (selector) => {
-  const e = await _find(selector)
-  return browser.text(e)
-}
-
-const _assertText = (selector, text) => retry(async () => {
-  const actual = await _getText(selector)
-
-  if (actual === text) {
-    return true
+  const fill = async (selector, value) => {
+    const e = await find(selector)
+    await e.clear()
+    return e.type(value)
   }
-  return Promise.reject('mismatch')
-})
-  .catch(textNotFound(selector, text))
 
-export const init = chain(_init)
-export const end = chain(_end)
-export const visit = chain(_visit)
-export const find = chain(_find)
-export const fill = chain(_fill)
-export const click = chain(_click)
-export const sleep = chain(_sleep)
-export const getText = chain(_getText)
-export const assertText = chain(_assertText)
+  const click = async (selector) => {
+    const e = await find(selector)
+    return e.click()
+  }
+
+  const sleep = (duration) =>
+    new Promise((resolve) => setTimeout(() => resolve(), duration))
+
+  const getText = async (selector) => {
+    const e = await find(selector)
+    return browser.text(e)
+  }
+
+  const assertText = (selector, text) => retry(async () => {
+    const actual = await getText(selector)
+
+    if (actual === text) {
+      return true
+    }
+    return Promise.reject('mismatch')
+  })
+    .catch(textNotFound(selector, text))
+
+  return {
+    init: (...args) => chain(() => init(...args)),
+    end: (...args) => chain(() => end(...args)),
+    visit: (...args) => chain(() => visit(...args)),
+    find: (...args) => chain(() => find(...args)),
+    fill: (...args) => chain(() => fill(...args)),
+    click: (...args) => chain(() => click(...args)),
+    sleep: (...args) => chain(() => sleep(...args)),
+    getText: (...args) => chain(() => getText(...args)),
+    assertText: (...args) => chain(() => assertText(...args)),
+    chain,
+  }
+}
