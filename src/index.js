@@ -3,7 +3,7 @@ import R from 'ramda'
 
 const DEFAULTS = {
   timeout: 5000,
-  browser: 'firefox'
+  browser: 'chrome'
 }
 
 export default (options) => {

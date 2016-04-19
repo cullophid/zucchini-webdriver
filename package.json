@@ -2,7 +2,7 @@
   "name": "zucchini-webdriver",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/index.js",
+  "main": "src/index.js",
   "scripts": {
     "selenium:install": "selenium-standalone install",
     "selenium:start": "selenium-standalone start",
@@ -25,6 +25,6 @@
   },
   "dependencies": {
     "ramda": "^0.18.0",
-    "wd": "^0.4.0"
+    "webdriverio": "^4.0.5"
   }
 }
