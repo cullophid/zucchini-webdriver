@@ -1,5 +1,5 @@
 import driverFactory from './driver'
-import R from 'ramda'
+import {merge} from 'ramda'
 
 const DEFAULTS = {
   timeout: 5000,
@@ -7,5 +7,5 @@ const DEFAULTS = {
 }
 
 export default (options) => {
-  return driverFactory(R.merge(DEFAULTS, options || {}))
+  return driverFactory(merge(DEFAULTS, options || {}))
 }

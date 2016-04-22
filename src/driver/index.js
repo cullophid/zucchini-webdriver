@@ -6,8 +6,12 @@ import {fill, click, visit} from './interact'
 import {hasText} from './assert'
 
 export default (options) => {
-  const browserOptions = {browserName: options.browser}
-  const wd = webdriver.remote(browserOptions)
+  const wdOptions = {
+    desiredCapabilities: {
+      browserName: options.browser
+    }
+  }
+  const wd = webdriver.remote(wdOptions)
 
   const retry = waitUntil(options.timeout)
   const chain = chainFactory()
