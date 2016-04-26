@@ -2,7 +2,7 @@
   "name": "zucchini-webdriver",
   "version": "2.0.2",
   "description": "",
-  "main": "src/index.js",
+  "main": "dist/index.js",
   "scripts": {
     "selenium:install": "selenium-standalone install",
     "selenium:start": "selenium-standalone start",
